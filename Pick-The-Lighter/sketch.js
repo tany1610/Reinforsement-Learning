@@ -45,7 +45,6 @@ function draw() {
 
   // getting the assuredness of the network
   assuredness = brain.getAssuredness(choice);
-  console.log(assuredness);
   if (random(1) < assuredness) {
     action = chosenAction;
   } else {
