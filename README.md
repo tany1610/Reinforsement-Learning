@@ -1,4 +1,4 @@
-# Reinforsment-Learning
+# Reinforcement-Learning
 
 ## Content
 * Custom created library for reinforcement learning using neural networks
