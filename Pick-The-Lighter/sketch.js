@@ -2,18 +2,23 @@ let left_square_col;
 let right_square_col;
 let reward = 0;
 let totalReward = 0;
-let choice;
+let episodeInfo = {
+  states: [],
+  actions: [],
+  rewards: [],
+  totalReward: 0,
+  cycles: 0
+}
 let brain;
 let actions;
 let rateSlider;
-let assuredness;
 
 function setup() {
   createCanvas(800, 800);
   rateSlider = createSlider(1, 120, 1, 1);
   rateSlider.position(250, 130);
   // creating the neural network
-  brain = new NeuralNetwork(2, 4, 2, 0.1);
+  brain = new NeuralNetwork(2, 4, 2, 0.4);
   left_square_col = floor(random(255));
   right_square_col = floor(random(255));
 
@@ -37,29 +42,34 @@ function draw() {
   // creating the current state
   let state = [x1, x2];
 
-  // taking an action
-  let choice = brain.predict(state);
-  let chosenAction = choice.indexOf(max(choice));
-  let randomAction = choice.indexOf(random(choice));
-  let action;
+  // making a decision
+  let action = brain.chooseAction(state);
 
-  // getting the assuredness of the network
-  assuredness = brain.getAssuredness(choice);
-  if (random(1) < assuredness) {
-    action = chosenAction;
-  } else {
-    action = randomAction;
-  }
+  // updating episode
+  episodeInfo.states.push([...state]);
   actions[action]();
+  episodeInfo.actions.push(action);
+  episodeInfo.rewards.push(reward);
+  episodeInfo.totalReward = reward;
+  episodeInfo.cycles++;
+  
+  // analyzing episode
+  brain.analyze(episodeInfo, 100);
 
-  // accumulating reward
-  brain.accumulateReward(state, action, reward);
+  // reset episodes
+  episodeInfo = {
+    states: [],
+    actions: [],
+    rewards: [],
+    totalReward: 0,
+    cycles: 0
+  }
 
   // drawing game
   drawGame();
 
   // drawing neural network
-  brain.draw(200, -400);
+  brain.draw(150, -400);
 
   // next iteration
   nextEpisode();
@@ -79,7 +89,7 @@ function drawGame() {
   text("Reward: " + reward.toFixed(2), -350, -350);
   text("Total Reward: " + totalReward.toFixed(2), -350, -300);
   text("Frame Rate: ", -350, -250);
-  text("Assured of current action: " + (assuredness * 100).toFixed(2) + "%", -350, -200);
+  text("Assured of current action: " + brain.assuredness.toFixed(2) + "%", -350, -200);
   fill(left_square_col);
   noStroke();
   rect(-150, -50, 100, 100);
@@ -115,4 +125,5 @@ function right() {
 function nextEpisode() {
   left_square_col = floor(random(255));
   right_square_col = floor(random(255));
+  totalReward = 0;
 }

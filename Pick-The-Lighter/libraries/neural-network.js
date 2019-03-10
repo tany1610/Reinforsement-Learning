@@ -24,6 +24,8 @@ class NeuralNetwork {
     for (let i = 0; i < outputNodes; i++) {
       this.outputNodesActivation.push(0);
     }
+
+    this.assuredness = 0;
   }
 
   predict(inputs) {
@@ -45,7 +47,7 @@ class NeuralNetwork {
 
     // adding the bias
     output.add(this.outputBias);
-    
+
     // activate
     output.map(sigmoid);
 
@@ -87,7 +89,7 @@ class NeuralNetwork {
     output.map(sigmoidD);
     output.multiply(outputErrors);
     output.multiply(this.learningRate);
-    
+
     // calculate hidden->output deltas
     let hiddenT = Matrix.transpose(hidden);
     let hiddenOutputDeltas = Matrix.multiply(output, hiddenT);
@@ -114,13 +116,61 @@ class NeuralNetwork {
     this.hiddenBias.add(hidden);
   }
 
-  calculateTargets (output, action, reward) {
+  chooseAction(state) {
+    let choice = this.predict(state);
+    let chosenAction = choice.indexOf(max(choice));
+    let randomAction = choice.indexOf(random(choice));
+    let action;
+
+    // getting the assuredness of the network
+    this.assuredness = this.getAssuredness(choice) * 100;
+    if (random(100) < this.assuredness) {
+      action = chosenAction;
+    } else {
+      action = randomAction;
+    }
+
+    return action;
+  }
+
+  analyze(episodeInfo, epochs) {
+    let analysis = {};
+    // get highest reward for each state
+    for (let i = 0; i < episodeInfo.cycles; i++) {
+      episodeInfo.rewards[i] = (i / episodeInfo.rewards.length + episodeInfo.rewards[i]) + totalReward;
+      let currState = [...episodeInfo.states[i]];
+      if (!analysis[currState]) {
+        analysis[currState] = {
+          action: episodeInfo.actions[i],
+          reward: episodeInfo.rewards[i]
+        }
+      } else {
+        if (analysis[currState].reward < episodeInfo.rewards[i]) {
+          analysis[currState] = {
+            action: episodeInfo.actions[i],
+            reward: episodeInfo.rewards[i]
+          }
+        }
+      }
+    }
+
+    for (let i = 0; i < epochs; i++) {
+      for (let stateKey in analysis) {
+        let state = stateKey.split(',').map(Number);
+        let action = analysis[stateKey].action;
+        let reward = analysis[stateKey].reward;
+        brain.accumulateReward(state, action, reward);
+      }
+    }
+  }
+
+  calculateTargets(output, action, reward) {
     let result = [];
     for (let i = 0; i < output.length; i++) {
       if (i === action) {
-        result[i] = output[i] + reward;
+        result[i] = (output[i] + reward) * this.learningRate;
       } else {
-        result[i] = output[i] - reward;
+        result[i] = (output[i] - reward) * this.learningRate;
       }
     }
     return result;
@@ -138,10 +188,13 @@ class NeuralNetwork {
   }
 
   getAssuredness(choice) {
-    let max = Math.max(...choice);
-    let min = Math.min(...choice);
-    let diff = Math.abs(max - min);
-    return diff;
+    let sorted = choice.sort((a, b) => b - a);
+    let max = sorted[0];
+    let diff = 0;
+    for (let i = 1; i < sorted.length; i++) {
+      diff += Math.abs(max - sorted[i]);
+    }
+    return diff / (sorted.length - 1);
   }
 
   // using p5
@@ -150,7 +203,7 @@ class NeuralNetwork {
     let startX = x;
     let startY = y + this.hiddenNodes * 20;
     for (let i = 0; i < this.inputNodes; i++) {
-      let endX = x + 50;
+      let endX = x + 100;
       let endY = y + this.inputNodes * 20;
       for (let j = 0; j < this.hiddenNodes; j++) {
         stroke(255);
@@ -162,10 +215,10 @@ class NeuralNetwork {
     }
 
     // drawing the hidden->output weights
-    startX = x + 50;
+    startX = x + 100;
     startY = y + this.inputNodes * 20;
     for (let i = 0; i < this.hiddenNodes; i++) {
-      let endX = startX + 50;
+      let endX = startX + 100;
       let endY = y + (this.hiddenNodes * 20 + this.inputNodes * 20) - Math.min(this.hiddenNodes * 20, this.outputNodes * 20);
       for (let j = 0; j < this.outputNodes; j++) {
         stroke(255);
@@ -188,7 +241,7 @@ class NeuralNetwork {
     }
 
     currY = y + this.inputNodes * 20;
-    currX = x + 50;
+    currX = x + 100;
 
     // drawing the hidden nodes
     for (let i = 0; i < this.hiddenNodes; i++) {
@@ -201,7 +254,7 @@ class NeuralNetwork {
 
     // drawing the output nodes
     currY = y + (this.hiddenNodes * 20 + this.inputNodes * 20) - Math.min(this.hiddenNodes * 20, this.outputNodes * 20);
-    currX += 50;
+    currX += 100;
     for (let i = 0; i < this.outputNodes; i++) {
       stroke(255);
       strokeWeight(2);

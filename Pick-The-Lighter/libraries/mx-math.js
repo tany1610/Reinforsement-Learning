@@ -1,5 +1,5 @@
 class Matrix {
-  constructor(rows, cols, matrix=null) {
+  constructor(rows, cols, matrix = null) {
     this.value = [];
     this.rows = rows || matrix.length;
     this.cols = cols || matrix[0].length;
@@ -26,7 +26,7 @@ class Matrix {
   randomize() {
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.cols; col++)
-        this.value[row][col] = Math.random() /** 3 + 1*/;
+        this.value[row][col] = Math.random() /** 3 + 1*/ ;
     }
   }
 

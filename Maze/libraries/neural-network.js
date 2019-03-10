@@ -133,7 +133,7 @@ class NeuralNetwork {
     return action;
   }
 
-  analyze (episodeInfo) {
+  analyze (episodeInfo, epochs) {
     let analysis = {};
     // get highest reward for each state
     for (let i = 0; i < episodeInfo.cycles; i++) {
@@ -154,7 +154,7 @@ class NeuralNetwork {
       }
     }
 
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < epochs; i++) {
       for (let stateKey in analysis) {
         let state = stateKey.split(',').map(Number);
         let action = analysis[stateKey].action;

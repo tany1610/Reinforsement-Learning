@@ -84,7 +84,7 @@ function nextEpisode() {
   episodeInfo.totalReward = totalReward;
   
   // sum up episode
-  brain.analyze(episodeInfo);
+  brain.analyze(episodeInfo, 50);
 
   episodeInfo = {
     actions: [],
