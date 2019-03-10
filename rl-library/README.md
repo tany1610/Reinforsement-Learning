@@ -18,7 +18,7 @@ Pass it the episode information. The constrains are:
 
 |State|Actions|Rewards|Total Reward|Cycles|
 |-----|----|----|----|----|
-|Each state should be an array and must match the input nodes of the network|Each action should be an index of the all possible actions in the environment|Each reward should be normalized (max range -10 and 10)|The total reward can be any number but you should be careful of the relation between each reward and the total reward|A single number|
+|Each state should be an array and must match the input nodes of the network|Each action should be an index of the all possible actions in the environment and should match the output nodes of the network|Each reward should be normalized (max range -10 and 10)|The total reward can be any number but you should be careful of the relation between each reward and the total reward|A single number|
 
 ## Useful info
 Use the assurance property to get the assurance of the last action the network took
