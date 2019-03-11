@@ -9,7 +9,7 @@ class Matrix {
         for (let col = 0; col < this.cols; col++) {
           this.value[row][col] = matrix[row][col];
           if (!matrix[row][col]) {
-            throw new Error('x and y do not match with the dimentions of the matrix.');
+            throw new Error('x and y do not match with the dimensions of the matrix.');
           }
         }
       }
@@ -51,6 +51,7 @@ class Matrix {
     }
   }
 
+  // element wise multiplication
   multiply(x) {
     if (+x) {
       for (let row = 0; row < this.rows; row++) {
@@ -58,16 +59,22 @@ class Matrix {
           this.value[row][col] *= x;
         }
       }
-    } else {
+    } else if (x instanceof Matrix) {
       for (let row = 0; row < this.rows; row++) {
         for (let col = 0; col < this.cols; col++) {
           this.value[row][col] *= x.value[row][col];
         }
       }
+    } else {
+      throw new Error('multiplication value must either be Matrix or a number');
     }
   }
 
+  // mapping the matrix to a function
   map(f) {
+    if (typeof x !== "function") {
+      throw new Error ('map parameter must be a function')
+    }
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.cols; col++) {
         this.value[row][col] = f(this.value[row][col]);
@@ -81,6 +88,9 @@ class Matrix {
 
   // static functions
   static fromArray(arr) {
+    if (arr instanceof Array === false) {
+      throw new Error('parameter must be an array');
+    }
     let result = new Matrix(arr.length, 1);
     for (let row = 0; row < arr.length; row++) {
       for (let col = 0; col < 1; col++) {
@@ -91,6 +101,9 @@ class Matrix {
   }
 
   static toArray(m) {
+    if (m instanceof Matrix === false) {
+      throw new Error('parameter must be an instance of a Matrix');
+    }
     let result = [];
     for (let row = 0; row < m.rows; row++) {
       for (let col = 0; col < m.cols; col++) {
@@ -100,7 +113,11 @@ class Matrix {
     return result;
   }
 
+  // dot product
   static multiply(m1, m2) {
+    if (m1 instanceof Matrix === false || m2 instanceof Matrix === false) {
+      throw new Error('both parameters must be an instance of a Matrix');
+    }
     let result = new Matrix(m1.rows, m2.cols);
     for (let row = 0; row < result.rows; row++) {
       for (let col = 0; col < result.cols; col++) {
@@ -114,7 +131,11 @@ class Matrix {
     return result;
   }
 
+  // element wise subtraction
   static subtract(m1, m2) {
+    if (m1 instanceof Matrix === false || m2 instanceof Matrix === false) {
+      throw new Error('both parameters must be an instance of a Matrix');
+    }
     let result = new Matrix(m1.rows, m1.cols);
     for (let row = 0; row < result.rows; row++) {
       for (let col = 0; col < result.cols; col++) {
@@ -125,6 +146,9 @@ class Matrix {
   }
 
   static transpose(m) {
+    if (m instanceof Matrix === false) {
+      throw new Error('parameter must be an instance of a Matrix');
+    }
     let result = new Matrix(m.cols, m.rows);
     for (let row = 0; row < result.rows; row++) {
       for (let col = 0; col < result.cols; col++) {
@@ -134,9 +158,3 @@ class Matrix {
     return result;
   }
 }
-
-// testing
-// let m1 = new Matrix(2, 1, [[2], [3]]);
-// let m2 = new Matrix(2, 2, [[1, 2], [3, 4]]);
-// m1.add(m2);
-// m1.print();

@@ -47,12 +47,6 @@ function draw() {
   // taking an action
   frameRate(speedSlider.value());
 
-  // draw brain
-  brain.draw(950, 150);
-
-  // drawing the game
-  drawGame();
-
   let action = brain.chooseAction(robbyPos);
 
   // taking action and recording actions and states
@@ -77,6 +71,12 @@ function draw() {
     totalReward += reward;
     episodeInfo.rewards.push(reward);
   }
+
+  // draw brain
+  brain.draw(950, 150);
+
+  // drawing the game
+  drawGame();
 }
 
 function nextEpisode() {
@@ -84,7 +84,7 @@ function nextEpisode() {
   episodeInfo.totalReward = totalReward;
   
   // sum up episode
-  brain.analyze(episodeInfo, 50);
+  brain.analyze(episodeInfo, 100);
 
   episodeInfo = {
     actions: [],
