@@ -1,6 +1,12 @@
 # Reinforcement Learning Library
 
-## Create episodeInfo object
+## Info
+A library using a single neural network for training an agend in an environment. The network can only consist of one hidden layer (update comming soon). All the neurons in the network use sigmoid activation function. The library inclused some function from the p5 library for drawing the network in the browser, so you can see how is the network currently structured and which neurons are firing in a given state of the agent. The library is using a rewarding system for learning, so you should be careful how you structure your environment and rewardings.
+
+## How it works
+You start by creating a neural network using the NeuralNetwork class. Then after building the environment you have to store information for an episode (how long it is, is your decision) with all the states the agent was, all the actions its taken and all the rewards it recieved, the total reward for the whole episode and the cycles (must match with the lengths of the states, actions and rewards). Then using the analyze function you pass that info as an object, the library will pick the best action for each state (with highest reward) and will train the agent toward this actions. Finaly you restart the episode and gather info for the next one.
+
+## The episodeInfo object
 An episode info object should have the following properties:
 * states - list of all states the agent have been to
 * actions - list of all the actions the agent has taken for the each of the states
