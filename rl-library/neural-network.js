@@ -15,7 +15,6 @@ class NeuralNetwork {
     this.outputBias.randomize();
     this.learningRate = learningRate;
 
-    // get the activation of the neurons for drawing
     this.hiddenNodesActivation = [];
     for (let i = 0; i < hiddenNodes; i++) {
       this.hiddenNodesActivation.push(0);
@@ -27,6 +26,7 @@ class NeuralNetwork {
     }
 
     this.assuredness = 0;
+	this.lastAnalysis = {};
   }
 
   predict(inputs) {
@@ -48,7 +48,7 @@ class NeuralNetwork {
 
     // adding the bias
     output.add(this.outputBias);
-
+    
     // activate
     output.map(sigmoid);
 
@@ -90,7 +90,7 @@ class NeuralNetwork {
     output.map(sigmoidD);
     output.multiply(outputErrors);
     output.multiply(this.learningRate);
-
+    
     // calculate hidden->output deltas
     let hiddenT = Matrix.transpose(hidden);
     let hiddenOutputDeltas = Matrix.multiply(output, hiddenT);
@@ -118,15 +118,12 @@ class NeuralNetwork {
   }
 
   chooseAction(state) {
-    // making a prediction
     let choice = this.predict(state);
     let chosenAction = choice.indexOf(max(choice));
     let randomAction = choice.indexOf(random(choice));
     let action;
 
-    // getting the assuredness of the network and
-    // taking the chosen or random action depending on
-    // the assuredness of the network
+    // getting the assuredness of the network
     this.assuredness = this.getAssuredness(choice) * 100;
     if (random(100) < this.assuredness) {
       action = chosenAction;
@@ -137,10 +134,9 @@ class NeuralNetwork {
     return action;
   }
 
-  analyze(episodeInfo, epochs) {
+  analyze (episodeInfo, epochs) {
     let analysis = {};
     // get highest reward for each state
-    // and build an analysis
     for (let i = 0; i < episodeInfo.cycles; i++) {
       episodeInfo.rewards[i] = (i / episodeInfo.rewards.length + episodeInfo.rewards[i]) + totalReward;
       let currState = [...episodeInfo.states[i]];
@@ -159,7 +155,6 @@ class NeuralNetwork {
       }
     }
 
-    // training with the analysis for a given amount of epochs
     for (let i = 0; i < epochs; i++) {
       for (let stateKey in analysis) {
         let state = stateKey.split(',').map(Number);
@@ -168,10 +163,10 @@ class NeuralNetwork {
         brain.accumulateReward(state, action, reward);
       }
     }
+	
+	this.lastAnalysis = analysis;
   }
 
-  // calculate deltas for the outputs
-  // in direction of the reward
   calculateTargets(output, action, reward) {
     let result = [];
     for (let i = 0; i < output.length; i++) {
@@ -184,24 +179,17 @@ class NeuralNetwork {
     return result;
   }
 
-  // get a prediction output
-  // calculate new target outputs
-  // train with the target output
   accumulateReward(state, action, reward) {
     let output = this.predict(state);
     let targets = this.calculateTargets(output, action, reward);
     this.train(state, targets);
   }
 
-  // print the weights on the console
   print() {
     this.inputHiddenWeights.print();
     this.hiddenOutputWeights.print();
   }
 
-  // calculate assuredness based on the average from
-  // the difference between the max number in the choice
-  // and all the other choices 
   getAssuredness(choice) {
     let sorted = choice.sort((a, b) => b - a);
     let max = sorted[0];
@@ -280,7 +268,6 @@ class NeuralNetwork {
   }
 }
 
-// used for drawing the inner part of each neuron
 function setActivation(nodes, actions) {
   for (let row = 0; row < nodes.rows; row++) {
     let color = floor(map(nodes.value[row][0], 0, 2, 0, 255));
@@ -293,7 +280,6 @@ function sigmoid(x) {
   return 1 / (1 + Math.exp(-x));
 }
 
-// derivatives
 function sigmoidD(y) {
   return y * (1 - y);
 }

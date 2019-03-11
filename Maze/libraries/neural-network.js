@@ -26,6 +26,7 @@ class NeuralNetwork {
     }
 
     this.assuredness = 0;
+	this.lastAnalysis = {};
   }
 
   predict(inputs) {
@@ -162,6 +163,8 @@ class NeuralNetwork {
         brain.accumulateReward(state, action, reward);
       }
     }
+	
+	this.lastAnalysis = analysis;
   }
 
   calculateTargets(output, action, reward) {

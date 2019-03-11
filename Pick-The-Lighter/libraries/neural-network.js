@@ -26,6 +26,7 @@ class NeuralNetwork {
     }
 
     this.assuredness = 0;
+	this.lastAnalysis = {};
   }
 
   predict(inputs) {
@@ -47,7 +48,7 @@ class NeuralNetwork {
 
     // adding the bias
     output.add(this.outputBias);
-
+    
     // activate
     output.map(sigmoid);
 
@@ -89,7 +90,7 @@ class NeuralNetwork {
     output.map(sigmoidD);
     output.multiply(outputErrors);
     output.multiply(this.learningRate);
-
+    
     // calculate hidden->output deltas
     let hiddenT = Matrix.transpose(hidden);
     let hiddenOutputDeltas = Matrix.multiply(output, hiddenT);
@@ -133,7 +134,7 @@ class NeuralNetwork {
     return action;
   }
 
-  analyze(episodeInfo, epochs) {
+  analyze (episodeInfo, epochs) {
     let analysis = {};
     // get highest reward for each state
     for (let i = 0; i < episodeInfo.cycles; i++) {
@@ -162,6 +163,8 @@ class NeuralNetwork {
         brain.accumulateReward(state, action, reward);
       }
     }
+	
+	this.lastAnalysis = analysis;
   }
 
   calculateTargets(output, action, reward) {
